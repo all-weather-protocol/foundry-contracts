@@ -12,6 +12,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 import "./3rd/radiant/IFeeDistribution.sol";
 import "./3rd/pendle/IPendleRouter.sol";
 import "./interfaces/AbstractVault.sol";
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
   using SafeERC20 for IERC20;

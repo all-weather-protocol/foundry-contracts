@@ -22,6 +22,7 @@ contract PermanentPortfolioLPToken is BasePortfolio {
   using Math for uint256;
 
   constructor(
+    address initialOwner,
     address asset_,
     string memory name_,
     string memory symbol_,
@@ -31,7 +32,7 @@ contract PermanentPortfolioLPToken is BasePortfolio {
     address payable magicArbitrumVaultAddr,
     address equilibriaPendleVaultAddr,
     address radiantVaultAddr
-  ) BasePortfolio(msg.sender, asset_, name_, symbol_) {
+  ) BasePortfolio(initialOwner, asset_, name_, symbol_) {
     require(
       equilibriaVaultAddr != address(0),
       "equilibriaVaultAddr cannot be zero"
