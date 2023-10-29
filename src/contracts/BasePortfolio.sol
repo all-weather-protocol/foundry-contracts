@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "./3rd/radiant/IFeeDistribution.sol";
 import "./3rd/pendle/IPendleRouter.sol";
 import "./interfaces/AbstractVault.sol";
 
 abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
+  using Math for uint256;
   event ClaimError(string errorMessage);
 
   struct PortfolioAllocationOfSingleCategory {
@@ -72,10 +72,11 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
   uint256 public constant UNIT_OF_SHARES = 10e15;
 
   constructor(
+    address initialOwner,
     address asset_,
     string memory name_,
     string memory symbol_
-  ) ERC20(name_, symbol_) {
+  ) ERC20(name_, symbol_) Ownable(initialOwner) {
     asset = ERC20(asset_);
   }
 
@@ -192,9 +193,9 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
         address(vaults[idx])
       );
       if (currentAllowance > 0) {
-        SafeERC20.safeApprove(IERC20(asset), address(vaults[idx]), 0);
+        SafeERC20.forceApprove(IERC20(asset), address(vaults[idx]), 0);
       }
-      SafeERC20.safeApprove(
+      SafeERC20.forceApprove(
         IERC20(asset),
         address(vaults[idx]),
         zapInAmountForThisVault
@@ -271,7 +272,8 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
       }
     }
 
-    uint256 shares = SafeMath.div(amountAfterDeductingFee, UNIT_OF_SHARES);
+    (bool succeeded, uint256 shares) = Math.tryDiv(amountAfterDeductingFee, UNIT_OF_SHARES);
+    require(succeeded == true, "Failed to tryDiv");
     require(shares > 0, "Shares must > 0");
     _mint(depositData.receiver, shares);
   }
@@ -496,11 +498,13 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     if (totalSupply() == 0) {
       return 0;
     }
-    return
-      SafeMath.div(
+    
+    (bool succeeded, uint256 result) = Math.tryDiv(
         oneOfTheUnclaimedRewardsAmountBelongsToThisPortfolio,
         totalSupply()
       );
+    require(succeeded == true, "Failed to tryDiv");
+    return result;
   }
 
   function _getAmountAfterDeductingFee(

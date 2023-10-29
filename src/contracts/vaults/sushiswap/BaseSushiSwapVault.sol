@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 // This is a Smart Contract written in Solidity. It represents a vault that allows users to deposit WETH and receive DPXV in return. The contract uses the functionalities of other smart contracts such as oneInch aggregator, SushiSwap, and MiniChefV2 to perform swaps and farming of SUSHI and DPX tokens. The contract has several functions including deposit(), redeem(), claim(), totalAssets(), totalLockedAssets(), totalStakedButWithoutLockedAssets(), and getClaimableRewards().
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../../3rd/dpx/IMiniChefV2.sol";
 import "../../3rd/dpx/ICloneRewarderTime.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../../3rd/sushiSwap/IUniswapV2Router01.sol";
 import "../../utils/IWETH.sol";
@@ -18,18 +19,8 @@ import "../../interfaces/AbstractVault.sol";
 import "../../3rd/radiant/IFeeDistribution.sol";
 
 contract BaseSushiSwapVault is AbstractVault {
-  using SafeMath for uint256;
+  using Math for uint256;
   using SafeERC20 for IERC20;
-  error ERC4626ExceededMaxRedeem(address owner, uint256 shares, uint256 max);
-
-  /**
-   * @dev Attempted to deposit more assets than the max amount for `receiver`.
-   */
-  error ERC4626ExceededMaxDeposit(
-    address receiver,
-    uint256 assets,
-    uint256 max
-  );
 
   IERC20 public token_consists_of_lp;
   IERC20 public constant SUSHI_TOKEN =
@@ -51,10 +42,11 @@ contract BaseSushiSwapVault is AbstractVault {
   }
 
   constructor(
+    address initialOwner,
     IERC20Metadata asset_,
     string memory name_,
     string memory symbol_
-  ) ERC4626(asset_) ERC20(name_, symbol_) {}
+  ) ERC4626(asset_) ERC20(name_, symbol_) Ownable(initialOwner) {}
 
   function _initializePid(uint256 pid_) internal onlyOnce("pid") onlyOwner {
     pid = pid_;
@@ -77,9 +69,9 @@ contract BaseSushiSwapVault is AbstractVault {
       oneInchAggregatorAddress
     );
     if (wethAllowance > 0) {
-      SafeERC20.safeApprove(WETH, oneInchAggregatorAddress, 0);
+      SafeERC20.forceApprove(WETH, oneInchAggregatorAddress, 0);
     }
-    SafeERC20.safeApprove(
+    SafeERC20.forceApprove(
       WETH,
       oneInchAggregatorAddress,
       Math.mulDiv(amount, 1, 2)
@@ -98,9 +90,9 @@ contract BaseSushiSwapVault is AbstractVault {
       SUSHISWAP_ROUTER_ADDRESS
     );
     if (tokenAllowance > 0) {
-      SafeERC20.safeApprove(token_consists_of_lp, SUSHISWAP_ROUTER_ADDRESS, 0);
+      SafeERC20.forceApprove(token_consists_of_lp, SUSHISWAP_ROUTER_ADDRESS, 0);
     }
-    SafeERC20.safeApprove(
+    SafeERC20.forceApprove(
       token_consists_of_lp,
       SUSHISWAP_ROUTER_ADDRESS,
       tokenReturnedAmount
@@ -127,9 +119,9 @@ contract BaseSushiSwapVault is AbstractVault {
       address(sushiSwapMiniChef)
     );
     if (slpAllowance > 0) {
-      SafeERC20.safeApprove(IERC20(asset()), address(sushiSwapMiniChef), 0);
+      SafeERC20.forceApprove(IERC20(asset()), address(sushiSwapMiniChef), 0);
     }
-    SafeERC20.safeApprove(
+    SafeERC20.forceApprove(
       IERC20(asset()),
       address(sushiSwapMiniChef),
       liquidity
