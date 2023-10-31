@@ -10,15 +10,10 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./vaults/sushiswap/MagicArbitrumVault.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
-import "./vaults/equilibria/EquilibriaGDAIVault.sol";
-import "./vaults/equilibria/EquilibriaRETHVault.sol";
-import "./vaults/equilibria/EquilibriaPendleVault.sol";
-import "./vaults/radiant/RadiantArbitrumVault.sol";
 import "./BasePortfolio.sol";
 
-contract PermanentPortfolioLPToken is BasePortfolio {
+contract IntermediateTermBond is BasePortfolio {
     using SafeERC20 for IERC20;
     using Math for uint256;
 
@@ -27,27 +22,9 @@ contract PermanentPortfolioLPToken is BasePortfolio {
         address asset_,
         string memory name_,
         string memory symbol_,
-        address equilibriaVaultAddr,
-        address equilibriaGDAIVaultAddr,
-        address equilibriaRETHVaultAddr,
-        address payable magicArbitrumVaultAddr,
-        address equilibriaPendleVaultAddr,
-        address radiantVaultAddr
+        address apolloxVaultAddr
     ) BasePortfolio(initialOwner, asset_, name_, symbol_) {
-        require(equilibriaVaultAddr != address(0), "equilibriaVaultAddr cannot be zero");
-        require(equilibriaGDAIVaultAddr != address(0), "equilibriaGDAIVaultAddr cannot be zero");
-        require(equilibriaRETHVaultAddr != address(0), "equilibriaRETHVaultAddr cannot be zero");
-        require(magicArbitrumVaultAddr != address(0), "magicArbitrumVaultAddr cannot be zero");
-        require(equilibriaPendleVaultAddr != address(0), "equilibriaPendleVaultAddr cannot be zero");
-        require(radiantVaultAddr != address(0), "radiantVaultAddr cannot be zero");
-
-        vaults = [
-            AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
-            AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr)),
-            AbstractVault(EquilibriaRETHVault(equilibriaRETHVaultAddr)),
-            AbstractVault(EquilibriaPendleVault(equilibriaPendleVaultAddr)),
-            AbstractVault(MagicArbitrumVault(magicArbitrumVaultAddr)),
-            AbstractVault(RadiantArbitrumVault(radiantVaultAddr))
-        ];
+        require(apolloxVaultAddr != address(0), "apolloxVaultAddr cannot be zero");
+        vaults = [AbstractVault(EquilibriaGlpVault(apolloxVaultAddr))];
     }
 }

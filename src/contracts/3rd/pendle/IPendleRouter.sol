@@ -4,13 +4,14 @@ pragma solidity 0.8.20;
 import "./IPSwapAggregator.sol";
 
 interface IPendleRouter {
-  struct ApproxParams {
-    uint256 guessMin;
-    uint256 guessMax;
-    uint256 guessOffchain; // pass 0 in to skip this variable
-    uint256 maxIteration; // every iteration, the diff between guessMin and guessMax will be divided by 2
-    uint256 eps; // the max eps between the returned result & the correct result, base 1e18. Normally this number will be set
-    // to 1e15 (1e18/1000 = 0.1%)
+    struct ApproxParams {
+        uint256 guessMin;
+        uint256 guessMax;
+        uint256 guessOffchain; // pass 0 in to skip this variable
+        uint256 maxIteration; // every iteration, the diff between guessMin and guessMax will be divided by 2
+        uint256 eps; // the max eps between the returned result & the correct result, base 1e18. Normally this number will be set
+            // to 1e15 (1e18/1000 = 0.1%)
+    }
 
     /// Further explanation of the eps. Take swapExactSyForPt for example. To calc the corresponding amount of Pt to swap out,
     /// it's necessary to run an approximation algorithm, because by default there only exists the Pt to Sy formula
@@ -26,42 +27,41 @@ interface IPendleRouter {
     /// before the tx is sent. When the tx reaches the contract, the guessOffchain will be checked first, and if it satisfies the
     /// approximation, it will be used (and save all the guessing). It's expected that this shortcut will be used in most cases
     /// except in cases that there is a trade in the same market right before the tx
-  }
 
-  struct TokenInput {
-    // Token/Sy data
-    address tokenIn;
-    uint256 netTokenIn;
-    address tokenMintSy;
-    address bulk;
-    // aggregator data
-    address pendleSwap;
-    SwapData swapData;
-  }
+    struct TokenInput {
+        // Token/Sy data
+        address tokenIn;
+        uint256 netTokenIn;
+        address tokenMintSy;
+        address bulk;
+        // aggregator data
+        address pendleSwap;
+        SwapData swapData;
+    }
 
-  struct TokenOutput {
-    // Token/Sy data
-    address tokenOut;
-    uint256 minTokenOut;
-    address tokenRedeemSy;
-    address bulk;
-    // aggregator data
-    address pendleSwap;
-    SwapData swapData;
-  }
+    struct TokenOutput {
+        // Token/Sy data
+        address tokenOut;
+        uint256 minTokenOut;
+        address tokenRedeemSy;
+        address bulk;
+        // aggregator data
+        address pendleSwap;
+        SwapData swapData;
+    }
 
-  function addLiquiditySingleToken(
-    address receiver,
-    address market,
-    uint256 minLpOut,
-    ApproxParams calldata guessPtReceivedFromSy,
-    TokenInput calldata input
-  ) external payable returns (uint256 netLpOut, uint256 netSyFee);
+    function addLiquiditySingleToken(
+        address receiver,
+        address market,
+        uint256 minLpOut,
+        ApproxParams calldata guessPtReceivedFromSy,
+        TokenInput calldata input
+    ) external payable returns (uint256 netLpOut, uint256 netSyFee);
 
-  function removeLiquiditySingleToken(
-    address receiver,
-    address market,
-    uint256 netLpToRemove,
-    TokenOutput calldata output
-  ) external returns (uint256 netTokenOut, uint256 netSyFee);
+    function removeLiquiditySingleToken(
+        address receiver,
+        address market,
+        uint256 netLpToRemove,
+        TokenOutput calldata output
+    ) external returns (uint256 netTokenOut, uint256 netSyFee);
 }

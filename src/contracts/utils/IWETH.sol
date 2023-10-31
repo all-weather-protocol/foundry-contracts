@@ -4,19 +4,15 @@ pragma solidity 0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IWETH is IERC20 {
-  function balanceOf(address account) external view override returns (uint256);
+    function balanceOf(address account) external view override returns (uint256);
 
-  function deposit() external payable;
+    function deposit() external payable;
 
-  function withdraw(uint256) external;
+    function withdraw(uint256) external;
 
-  function approve(address guy, uint256 wad) external override returns (bool);
+    function approve(address guy, uint256 wad) external override returns (bool);
 
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 wad
-  ) external override returns (bool);
+    function transferFrom(address src, address dst, uint256 wad) external override returns (bool);
 
-  function transfer(address to, uint value) external override returns (bool);
+    function transfer(address to, uint256 value) external override returns (bool);
 }

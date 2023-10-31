@@ -6,16 +6,12 @@ pragma solidity 0.8.20;
 import "./BaseSushiSwapVault.sol";
 
 contract MagicArbitrumVault is BaseSushiSwapVault {
-  constructor(
-    address initialOwner,
-    IERC20Metadata asset_,
-    string memory name_,
-    string memory symbol_
-  ) BaseSushiSwapVault(initialOwner, asset_, name_, symbol_) {
-    _initializePid(13);
-    _initializeLpTokenAndRewarder(
-      0x539bdE0d7Dbd336b79148AA742883198BBF60342,
-      0x1a9c20e2b0aC11EBECbDCA626BBA566c4ce8e606
-    );
-  }
+    constructor(address initialOwner, IERC20Metadata asset_, string memory name_, string memory symbol_)
+        BaseSushiSwapVault(initialOwner, asset_, name_, symbol_)
+    {
+        _initializePid(13);
+        _initializeLpTokenAndRewarder(
+            0x539bdE0d7Dbd336b79148AA742883198BBF60342, 0x1a9c20e2b0aC11EBECbDCA626BBA566c4ce8e606
+        );
+    }
 }
